@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AeonsEndCompanion</string>
+    <string name="confirm">Confirm</string>
+    <string name="num_players">Enter the number of Players</string>
+    <string name="draw">Draw next turn card</string>
+    <string name="cancel">Cancel</string>
+</resources>
