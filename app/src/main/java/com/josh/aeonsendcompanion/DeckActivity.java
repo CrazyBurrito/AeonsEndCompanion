@@ -21,7 +21,7 @@ import java.util.Iterator;
 public class DeckActivity extends AppCompatActivity{
 
     public ArrayList<Card> deck = new ArrayList<>();
-    public Animation a;
+    public Animation animation;
     private ArrayList<Card> discard = new ArrayList<>();
     public int players = Integer.parseInt(MainActivity.numPlayers);
 
@@ -30,8 +30,8 @@ public class DeckActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deck);
-        a = AnimationUtils.loadAnimation(this, R.anim.alpha);
-        a.reset();
+        animation = AnimationUtils.loadAnimation(this, R.anim.alpha);
+        animation.reset();
 
         Card card1 = new Card((TextView) findViewById(R.id.card1));
         Card card2 = new Card((TextView) findViewById(R.id.card2));
@@ -91,7 +91,7 @@ public class DeckActivity extends AppCompatActivity{
 
     public void nextPlayer(View view){
 
-        ImageView turnImage = (ImageView) findViewById(R.id.turnImage);
+        ImageView turnImage = findViewById(R.id.turnImage);
 
         if(deck.isEmpty()){
             for(Iterator<Card> iterator = discard.iterator(); iterator.hasNext();){
@@ -135,7 +135,7 @@ public class DeckActivity extends AppCompatActivity{
                 turnImage.setImageResource(R.drawable.turn_order_wild);
                 break;
         }
-        turnImage.startAnimation(a);
+        turnImage.startAnimation(animation);
 
     }
 
@@ -147,12 +147,12 @@ public class DeckActivity extends AppCompatActivity{
                 public void onClick(View v) {
                     v.setBackgroundResource(R.drawable.border_green);
                     Card card = (Card)v.getTag();
-                    card.setShuffle(true);
+                    card.setTaggedForShuffle(true);
                 }
             });
         }
 
-        ImageButton nextButton = (ImageButton) findViewById(R.id.nextButton);
+        ImageButton nextButton = findViewById(R.id.nextButton);
         nextButton.setClickable(false);
 
         view.setVisibility(View.GONE);
@@ -163,7 +163,7 @@ public class DeckActivity extends AppCompatActivity{
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, DrawerLayout.LayoutParams.MATCH_PARENT, 0.5f);
         confirmShuffle.setLayoutParams(params);
         cancelShuffle.setLayoutParams(params);
-        ViewGroup layout = (ViewGroup) findViewById(R.id.shuffleLayout);
+        ViewGroup layout = findViewById(R.id.shuffleLayout);
         layout.addView(confirmShuffle);
         layout.addView(cancelShuffle);
 
@@ -179,11 +179,11 @@ public class DeckActivity extends AppCompatActivity{
                     }
                 }
                 Collections.shuffle(deck);
-                ImageButton nextButton = (ImageButton) findViewById(R.id.nextButton);
+                ImageButton nextButton = findViewById(R.id.nextButton);
                 nextButton.setClickable(true);
                 cancelShuffle.setVisibility(View.GONE);
                 confirmShuffle.setVisibility(View.GONE);
-                Button shuffleButton = (Button) findViewById(R.id.shuffleButton);
+                Button shuffleButton = findViewById(R.id.shuffleButton);
                 shuffleButton.setVisibility(View.VISIBLE);
             }
         });
@@ -193,15 +193,15 @@ public class DeckActivity extends AppCompatActivity{
             public void onClick(View view) {
                 cancelShuffle.setVisibility(View.GONE);
                 confirmShuffle.setVisibility(View.GONE);
-                Button shuffleButton = (Button) findViewById(R.id.shuffleButton);
+                Button shuffleButton =  findViewById(R.id.shuffleButton);
                 shuffleButton.setVisibility(View.VISIBLE);
-                ImageButton nextButton = (ImageButton) findViewById(R.id.nextButton);
+                ImageButton nextButton = findViewById(R.id.nextButton);
                 nextButton.setClickable(true);
 
                 for(Card card : discard){
                     if(card.isTaggedForShuffle()){
                         card.setBackground(R.drawable.border_red);
-                        card.setShuffle(false);
+                        card.setTaggedForShuffle(false);
                     }
                 }
             }
