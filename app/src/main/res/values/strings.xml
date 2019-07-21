@@ -4,4 +4,7 @@
     <string name="num_players">Enter the number of Players</string>
     <string name="draw">Draw next turn card</string>
     <string name="cancel">Cancel</string>
+    <string name="shuffle">Shuffle discard</string>
+    <string name="scry">Scry</string>
+    <string name="scry_depth_message">How many cards would you like to look at?</string>
 </resources>

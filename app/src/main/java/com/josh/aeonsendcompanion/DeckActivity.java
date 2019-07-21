@@ -1,24 +1,36 @@
 package com.josh.aeonsendcompanion;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
-public class DeckActivity extends AppCompatActivity{
+public class DeckActivity extends AppCompatActivity implements  AdapterView.OnItemSelectedListener{
 
     public ArrayList<Card> deck = new ArrayList<>();
     public Animation animation;
@@ -208,6 +220,55 @@ public class DeckActivity extends AppCompatActivity{
         });
     }
 
+    public void scry(View view) {
+        PopupWindow popupWindow = new PopupWindow(this);
+        TextView scryDepthMessageView = new TextView(this);
+        Spinner depthSpinner = new Spinner(this);
+        List<String> scryDepths = new ArrayList<>();
+        ConstraintLayout layout = new ConstraintLayout(this);
+        ConstraintSet constraintSet = new ConstraintSet();
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
 
+        scryDepthMessageView.setText(R.string.scry_depth_message);
+        scryDepthMessageView.setBackground(new ColorDrawable(Color.BLACK));
+        scryDepthMessageView.setTextColor(Color.WHITE);
+        scryDepthMessageView.setHeight(height/10);
 
+        depthSpinner.setOnItemSelectedListener(this);
+
+        for (int i =1; i <= deck.size(); i++) {
+            scryDepths.add(String.valueOf(i));
+        }
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, scryDepths);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        depthSpinner.setAdapter(dataAdapter);
+        depthSpinner.setBackground(new ColorDrawable(Color.DKGRAY));
+        depthSpinner.setMinimumHeight(height/10);
+        depthSpinner.setTop(scryDepthMessageView.getBottom());
+        layout.addView(scryDepthMessageView);
+        layout.addView(depthSpinner);
+
+        //TODO this isn't working. Figure out why
+        constraintSet.clone(layout);
+        constraintSet.connect(depthSpinner.getId(), ConstraintSet.BOTTOM, scryDepthMessageView.getId(), ConstraintSet.TOP, 0);
+        constraintSet.applyTo(layout);
+
+        popupWindow.setContentView(layout);
+        popupWindow.showAtLocation(view, Gravity.CENTER, 10, 10);
+
+        //TODO scry functionality
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent){
+        //error
+    }
 }
