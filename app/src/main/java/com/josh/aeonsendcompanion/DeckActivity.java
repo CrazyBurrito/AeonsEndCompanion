@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.Layout;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -22,9 +23,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -64,29 +69,29 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
             deck.add(card6);
         }
 
-        card1.setRole("Nemesis");
-        card2.setRole("Nemesis");
-        card3.setRole("Player 1");
+        card1.setRole(Role.NEMESIS);
+        card2.setRole(Role.NEMESIS);
+        card3.setRole(Role.PLAYER_1);
 
         switch (players){
             case 1:
-                card4.setRole("Player 1");
-                card5.setRole("Player 1");
+                card4.setRole(Role.PLAYER_1);
+                card5.setRole(Role.PLAYER_1);
                 break;
             case 2:
-                card4.setRole("Player 1");
-                card5.setRole("Player 2");
-                card6.setRole("Player 2");
+                card4.setRole(Role.PLAYER_1);
+                card5.setRole(Role.PLAYER_2);
+                card6.setRole(Role.PLAYER_2);
                 break;
             case 3:
-                card4.setRole("Player 2");
-                card5.setRole("Player 3");
-                card6.setRole("Wild");
+                card4.setRole(Role.PLAYER_2);
+                card5.setRole(Role.PLAYER_3);
+                card6.setRole(Role.WILD);
                 break;
             case 4:
-                card4.setRole("Player 2");
-                card5.setRole("Player 3");
-                card6.setRole("Player 4");
+                card4.setRole(Role.PLAYER_2);
+                card5.setRole(Role.PLAYER_3);
+                card6.setRole(Role.PLAYER_4);
                 break;
             default:
                 //error
@@ -121,6 +126,9 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
             for(Card card : deck){
                 card.setBackground(R.drawable.border_yellow);
             }
+
+            Button scryButton = findViewById(R.id.scryButton);
+            scryButton.setEnabled(true);
         }
 
         Card next = deck.remove(0);
@@ -128,26 +136,31 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
         discard.add(next);
 
         switch(next.getRole()){
-            case "Nemesis":
+            case NEMESIS:
                 turnImage.setImageResource(R.drawable.turn_order_nemesis);
                 break;
-            case "Player 1":
+            case PLAYER_1:
                 turnImage.setImageResource(R.drawable.turn_order_p1);
                 break;
-            case "Player 2":
+            case PLAYER_2:
                 turnImage.setImageResource(R.drawable.turn_order_p2);
                 break;
-            case "Player 3":
+            case PLAYER_3:
                 turnImage.setImageResource(R.drawable.turn_order_p3);
                 break;
-            case "Player 4":
+            case PLAYER_4:
                 turnImage.setImageResource(R.drawable.turn_order_p4);
                 break;
-            case "Wild":
+            case WILD:
                 turnImage.setImageResource(R.drawable.turn_order_wild);
                 break;
         }
         turnImage.startAnimation(animation);
+
+        if (deck.size() < 2) {
+            Button scryButton = findViewById(R.id.scryButton);
+            scryButton.setEnabled(false);
+        }
 
     }
 
@@ -168,11 +181,13 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
         nextButton.setClickable(false);
 
         view.setVisibility(View.GONE);
+        final View scryButton = findViewById(R.id.scryButton);
+        scryButton.setVisibility(View.GONE);
         final Button confirmShuffle = new Button(this);
         final Button cancelShuffle = new Button(this);
         confirmShuffle.setText(R.string.confirm);
         cancelShuffle.setText(R.string.cancel);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, DrawerLayout.LayoutParams.MATCH_PARENT, 0.5f);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT, 0.5f);
         confirmShuffle.setLayoutParams(params);
         cancelShuffle.setLayoutParams(params);
         ViewGroup layout = findViewById(R.id.shuffleLayout);
@@ -197,6 +212,11 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
                 confirmShuffle.setVisibility(View.GONE);
                 Button shuffleButton = findViewById(R.id.shuffleButton);
                 shuffleButton.setVisibility(View.VISIBLE);
+                scryButton.setVisibility(View.VISIBLE);
+
+                if (deck.size() > 1) {
+                    scryButton.setEnabled(true);
+                }
             }
         });
 
@@ -207,6 +227,8 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
                 confirmShuffle.setVisibility(View.GONE);
                 Button shuffleButton =  findViewById(R.id.shuffleButton);
                 shuffleButton.setVisibility(View.VISIBLE);
+                scryButton.setVisibility(View.VISIBLE);
+
                 ImageButton nextButton = findViewById(R.id.nextButton);
                 nextButton.setClickable(true);
 
@@ -221,43 +243,33 @@ public class DeckActivity extends AppCompatActivity implements  AdapterView.OnIt
     }
 
     public void scry(View view) {
-        PopupWindow popupWindow = new PopupWindow(this);
-        TextView scryDepthMessageView = new TextView(this);
-        Spinner depthSpinner = new Spinner(this);
-        List<String> scryDepths = new ArrayList<>();
-        ConstraintLayout layout = new ConstraintLayout(this);
-        ConstraintSet constraintSet = new ConstraintSet();
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View popupView = inflater.inflate(R.layout.scry_popup, null);
+        final PopupWindow popupWindow = new PopupWindow(popupView, LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, true);
 
-        scryDepthMessageView.setText(R.string.scry_depth_message);
-        scryDepthMessageView.setBackground(new ColorDrawable(Color.BLACK));
-        scryDepthMessageView.setTextColor(Color.WHITE);
-        scryDepthMessageView.setHeight(height/10);
+        SeekBar scryDepthSeekBar = popupView.findViewById(R.id.scryDepthSeekBar);
+        scryDepthSeekBar.setMax(deck.size());
+        scryDepthSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                TextView scryDepthProgress = popupView.findViewById(R.id.scryDepthProgress);
+                scryDepthProgress.setText(String.valueOf(progress + 1));
+            }
 
-        depthSpinner.setOnItemSelectedListener(this);
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
 
-        for (int i =1; i <= deck.size(); i++) {
-            scryDepths.add(String.valueOf(i));
-        }
+            }
 
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, scryDepths);
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        depthSpinner.setAdapter(dataAdapter);
-        depthSpinner.setBackground(new ColorDrawable(Color.DKGRAY));
-        depthSpinner.setMinimumHeight(height/10);
-        depthSpinner.setTop(scryDepthMessageView.getBottom());
-        layout.addView(scryDepthMessageView);
-        layout.addView(depthSpinner);
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
 
-        //TODO this isn't working. Figure out why
-        constraintSet.clone(layout);
-        constraintSet.connect(depthSpinner.getId(), ConstraintSet.BOTTOM, scryDepthMessageView.getId(), ConstraintSet.TOP, 0);
-        constraintSet.applyTo(layout);
+            }
+        });
 
-        popupWindow.setContentView(layout);
-        popupWindow.showAtLocation(view, Gravity.CENTER, 10, 10);
+        popupWindow.setWidth(ConstraintLayout.LayoutParams.WRAP_CONTENT);
+
+        popupWindow.showAtLocation(findViewById(R.id.deckGrid), Gravity.CENTER, 0, 0);
 
         //TODO scry functionality
     }

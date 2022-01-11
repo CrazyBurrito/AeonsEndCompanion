@@ -8,6 +8,7 @@
     tools:context="com.josh.aeonsendcompanion.DeckActivity">
 
     <GridLayout
+        android:id="@+id/deckGrid"
         android:layout_width="395dp"
         android:layout_height="587dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -106,9 +107,9 @@
                     android:layout_height="match_parent"
                     android:layout_weight=".5"
                     android:clickable="true"
+                    android:focusable="true"
                     android:onClick="scry"
-                    android:text="@string/scry"
-                    android:focusable="true" />
+                    android:text="@string/scry" />
             </LinearLayout>
 
             <ImageView

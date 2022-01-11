@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 public class Card {
 
-    private String role;
+    private Role role;
     private TextView cardView;
     private Boolean taggedForShuffle;
 
@@ -19,9 +19,9 @@ public class Card {
         cardView.setBackgroundResource(R.drawable.border_yellow);
     }
 
-    void setRole(String role){
+    void setRole(Role role){
         this.role = role;
-        cardView.setText(role);
+        cardView.setText(role.toString());
     }
 
     void setTaggedForShuffle(Boolean taggedForShuffle){
@@ -32,7 +32,7 @@ public class Card {
         cardView.setBackgroundResource(background);
     }
 
-    String getRole(){
+    Role getRole(){
         return role;
     }
 
